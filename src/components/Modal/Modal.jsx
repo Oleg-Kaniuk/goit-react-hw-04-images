@@ -1,38 +1,41 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Overlay, ModalWindow } from './Modal.styled';
 
 const rootModal = document.querySelector('#root-modal');
 
 export const Modal = ({ selectedPhoto: { largeImageURL, tags }, onClose }) => {
-    
+
+    const onEscapeCloseModal = useCallback((evt) => {
+        if (evt.code === 'Escape') {
+            onClose();
+        }
+    }, [onClose]);
+
     useEffect(() => {
-        window.addEventListener('keydown', onEscapeCloseModal);
+        const handleEscape = (evt) => onEscapeCloseModal(evt);
+        window.addEventListener('keydown', handleEscape);
         return () => {
-            window.removeEventListener('keydown', onEscapeCloseModal);
+            window.removeEventListener('keydown', handleEscape);
         };
     }, [onEscapeCloseModal]);
 
-    function onEscapeCloseModal(evt) {
-        if (evt.code === 'Escape') {
-            onClose();
-        };
-    }
-
-    const onClickOverlay = evt => {
+    const onClickOverlay = useCallback((evt) => {
         if (evt.target === evt.currentTarget) {
             onClose();
-        };
-    }
+        }
+    }, [onClose]);
 
     return createPortal(
-            <Overlay onClick={onClickOverlay}>
-                <ModalWindow>
-                    <img src={largeImageURL} alt={tags} />
-                </ModalWindow>
-            </Overlay>,
-            rootModal);
-}
+        <Overlay onClick={onClickOverlay}>
+            <ModalWindow>
+                <img src={largeImageURL} alt={tags} />
+            </ModalWindow>
+        </Overlay>,
+        rootModal
+    );
+};
+
 
 
 
